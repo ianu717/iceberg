@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDEs
+.vscode/
+.idea/
+
+# Python tooling
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env/config sensible
+.env
+.env.*
+
+# Logs
+*.log
+
+# Tests/notebooks (opcional)
+notebooks/
+data
+
+# Docker
+Dockerfile*
+docker-compose*

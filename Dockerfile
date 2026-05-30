@@ -14,7 +14,7 @@
 # ============================================================
 
 # ---------- STAGE 1: builder ----------
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.11-bookworm-slim AS builder
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -34,7 +34,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 
 # ---------- STAGE 2: imagen final ----------
-FROM python:3.12-slim-bookworm
+FROM python:3.11-slim-bookworm
 
 WORKDIR /app
 
@@ -52,5 +52,4 @@ ENV PORT=8000
 EXPOSE 8000
 
 # IMPORTANTE: forma "shell" para que ${PORT} se expanda.
-# Ajustad "api.main:app" a la ruta real de vuestra app FastAPI.
-CMD uvicorn api.main:app --host 0.0.0.0 --port ${PORT}
+CMD uvicorn api.api:app --host 0.0.0.0 --port ${PORT}
