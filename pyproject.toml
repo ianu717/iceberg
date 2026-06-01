@@ -12,6 +12,8 @@ dependencies = [
     "numpy>=2.4.6",
     "pandas>=3.0.3",
     "psycopg2>=2.9.12",
+    "requests>=2.34.2",
     "sqlalchemy>=2.0.50",
+    "tqdm>=4.67.3",
     "uvicorn>=0.48.0",
 ]
