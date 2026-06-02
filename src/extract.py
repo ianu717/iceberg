@@ -25,6 +25,7 @@ from .config import CATALOG_QUERY_URL, RAW_DIR
 logger = logging.getLogger(__name__)
 
 _SSL_CTX = ssl.create_default_context(cafile=certifi.where())
+_SSL_CTX.minimum_version = ssl.TLSVersion.TLSv1_2
 _HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; Txoko-Bootcamp/1.0)"}
 
 

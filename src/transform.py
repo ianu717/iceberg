@@ -17,68 +17,64 @@ from .config import RAW_DIR, PROCESSED_DIR, CATEGORY_MAP
 logger = logging.getLogger(__name__)
 
 
-def normalize_record(record, dataset_name):
-    """Transforma UN registro JSON crudo al esquema maestro de Txoko."""
-    cat, subcat = CATEGORY_MAP.get(dataset_name, ("Otros", dataset_name))
-
-    # Coordenadas: float o None si vacías.
+def _parse_coords(record):
+    """Coordenadas: float o None si vacías."""
     try:
         lat = float(record.get("latwgs84") or 0) or None
         lon = float(record.get("lonwgs84") or 0) or None
     except (ValueError, TypeError):
         lat, lon = None, None
+    return lat, lon
 
-    nombre = record.get("documentName") or record.get("name") or ""
 
-    # Dirección: puede ser string o dict anidado.
+def _parse_address(record):
+    """Dirección: puede ser string o dict anidado."""
     addr_raw = record.get("address", "")
     if isinstance(addr_raw, dict):
-        addr = ", ".join(str(v) for v in addr_raw.values() if v and v not in ("", 0))
-    else:
-        addr = str(addr_raw) if addr_raw else ""
+        return ", ".join(str(v) for v in addr_raw.values() if v and v not in ("", 0))
+    return str(addr_raw) if addr_raw else ""
 
-    # Municipio: normalizar espacios y capitalización.
+
+def _parse_municipio(record):
+    """Municipio: normalizar espacios y capitalización."""
     municipio = (record.get("municipality") or record.get("locality") or "").strip()
     municipio = re.sub(r"\s+", " ", municipio)
-    if municipio.isupper():
-        municipio = municipio.title()
+    return municipio.title() if municipio.isupper() else municipio
 
-    # Territorio: normalizar variantes y multi-territorio.
+
+def _parse_territorio(record):
+    """Territorio: normalizar variantes y multi-territorio."""
     terr_raw = (record.get("territory") or "").strip().upper()
     terr_raw = re.sub(r"\s+", " ", terr_raw)
     terr_raw = (terr_raw.replace("ARABA/ÁLAVA", "ARABA")
                         .replace("ÁLAVA", "ARABA")
                         .replace("ALAVA", "ARABA"))
-    has_a, has_b, has_g = ("ARABA" in terr_raw, "BIZKAIA" in terr_raw, "GIPUZKOA" in terr_raw)
-    n_terr = sum([has_a, has_b, has_g])
-    if n_terr > 1:
-        territorio = "EUSKADI"
-    elif has_a:
-        territorio = "ARABA"
-    elif has_b:
-        territorio = "BIZKAIA"
-    elif has_g:
-        territorio = "GIPUZKOA"
-    else:
-        territorio = "DESCONOCIDO"
 
-    web = (record.get("web") or record.get("webpage") or
-           record.get("physicalUrl") or record.get("friendlyUrl") or "")
-    desc = (record.get("documentDescription") or "")[:300]
+    matches = [t for t in ("ARABA", "BIZKAIA", "GIPUZKOA") if t in terr_raw]
+    if len(matches) > 1:
+        return "EUSKADI"
+    return matches[0] if matches else "DESCONOCIDO"
+
+
+def normalize_record(record, dataset_name):
+    """Transforma UN registro JSON crudo al esquema maestro de Txoko."""
+    cat, subcat = CATEGORY_MAP.get(dataset_name, ("Otros", dataset_name))
+    lat, lon = _parse_coords(record)
 
     return {
         "source_dataset": dataset_name,
         "categoria": cat,
         "subcategoria": subcat,
-        "nombre": nombre,
-        "descripcion": desc,
-        "municipio": municipio,
-        "territorio": territorio,
+        "nombre": record.get("documentName") or record.get("name") or "",
+        "descripcion": (record.get("documentDescription") or "")[:300],
+        "municipio": _parse_municipio(record),
+        "territorio": _parse_territorio(record),
         "lat": lat,
         "lon": lon,
-        "direccion": addr,
+        "direccion": _parse_address(record),
         "telefono": record.get("phone") or record.get("telephone") or "",
-        "web": web,
+        "web": (record.get("web") or record.get("webpage") or
+                record.get("physicalUrl") or record.get("friendlyUrl") or ""),
         "ficha_turismo": record.get("physicalUrl") or record.get("friendlyUrl") or "",
     }
 
