@@ -50,7 +50,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 #     tu aplicación necesite. NO uses `COPY . /app`.
 # ------------------------------------------------------------
 COPY pyproject.toml uv.lock entrypoint.sh .python-version ./
-COPY api/ ./api/
+#COPY src/app/api/ ./api/
 COPY src/ ./src/
 # COPY <otro_paquete>/ ./<otro_paquete>/
 # COPY <otro_fichero_necesario> ./
