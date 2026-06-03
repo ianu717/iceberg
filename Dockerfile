@@ -77,8 +77,12 @@ ENV PATH="/app/.venv/bin:$PATH"
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Usuario no root (buena práctica de seguridad).
-RUN useradd --create-home appuser && chown -R appuser:appuser /app
+# Dar permisos de ejecución al entrypoint y crear el usuario no root
+# en una sola instrucción RUN (buena práctica de seguridad y se
+# reduce el número de capas de la imagen).
+RUN chmod +x /app/entrypoint.sh \
+    && useradd --create-home appuser \
+    && chown -R appuser:appuser /app
 USER appuser
 
 # Render asigna el puerto vía $PORT. EXPOSE es informativo;
