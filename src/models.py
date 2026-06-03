@@ -1,13 +1,16 @@
 """
-models.py - Modelos de datos (SQLAlchemy ORM) para Txoko.
+models.py - Modelos de datos (SQLAlchemy ORM) para Txoko/Aupa.
 
-El modelo Lugar representa un punto de interés del dataset maestro.
-Incluye una columna geográfica PostGIS (ubicacion) para las consultas
-"cerca de mí". Se conserva también lat/lon como floats por comodidad
-(para devolver al front sin tener que desempaquetar el punto).
+El modelo Lugar representa un punto de interés del dataset maestro
+(aupa_master_v5). Incluye:
+  - datos base (nombre, categoría, ubicación administrativa)
+  - columna geográfica PostGIS (ubicacion) para "cerca de mí"
+  - datos de Google (place_id, rating, num_reviews)
+  - señales del modelo de ML (signal_*, local_ratio...)
+  - flags y recomendaciones por perfil (rec_*)
 """
 
-from sqlalchemy import Column, Integer, String, Float, Text, Index
+from sqlalchemy import Column, Integer, String, Float, Text, Boolean, Index
 from geoalchemy2 import Geography
 
 from .db import Base
@@ -16,11 +19,10 @@ from .db import Base
 class Lugar(Base):
     __tablename__ = "lugares"
 
-    # id propio de Txoko (txk_00001...). Lo usamos como clave primaria
-    # porque ya es único y trazable desde el pipeline.
+    # id propio (txk_00000...). Clave primaria, único y trazable.
     id = Column(String(12), primary_key=True)
 
-    # Procedencia (trazabilidad de la fuente).
+    # Procedencia.
     source_dataset = Column(String(80))
 
     # Clasificación.
@@ -32,29 +34,51 @@ class Lugar(Base):
     descripcion = Column(Text)
 
     # Ubicación administrativa.
+    # municipio amplio: algunos registros traen listas largas de municipios.
     municipio = Column(String(2000), index=True)
     territorio = Column(String(20), index=True)
 
-    # Coordenadas en bruto (pueden ser NULL si el registro no tenía coords).
+    # Coordenadas en bruto (NULL si el registro no tenía coords).
     lat = Column(Float)
     lon = Column(Float)
 
-    # Punto geográfico PostGIS (SRID 4326 = GPS estándar). NULL si sin coords.
-    # spatial_index=False aquí porque creamos el índice GiST aparte abajo.
+    # Punto geográfico PostGIS (SRID 4326). NULL si sin coords.
     ubicacion = Column(
         Geography(geometry_type="POINT", srid=4326, spatial_index=False),
         nullable=True,
     )
 
-    # Contacto.
-    direccion = Column(Text)
-    telefono = Column(String(60))
+    # Enlaces.
     web = Column(String(400))
     ficha_turismo = Column(String(400))
 
+    # --- Datos de Google Places ---
+    # place_id puede superar el formato estándar en algunos registros.
+    google_place_id = Column(String(200), index=True)
+    google_rating = Column(Float)
+    google_num_reviews = Column(Integer)
+    google_match_conf = Column(String(20))      # 'high' / 'medium' / NULL
 
-# Índice espacial GiST sobre la columna geográfica -> acelera las
-# búsquedas por cercanía (ST_DWithin / ST_Distance).
+    # --- Señales del modelo y score de "localness" ---
+    local_ratio = Column(Float)                 # ratio local (target/score)
+    local_ratio_confidence = Column(String(20)) # 'high' / 'medium'
+    signal_category = Column(Float)
+    signal_hidden = Column(Float)
+    signal_language_norm = Column(Float)
+    signal_municipality = Column(Float)
+
+    # --- Flags ---
+    mappable = Column(Boolean)                   # tiene coords mapeables
+    has_google_data = Column(Boolean)            # tiene datos de Google
+    excluir_modelo = Column(Boolean)             # excluido del modelo
+
+    # --- Recomendaciones por perfil (etiquetas 0/1) ---
+    rec_txoko_social = Column(Boolean)
+    rec_mendi_familia = Column(Boolean)
+    rec_kultura = Column(Boolean)
+
+
+# Índice espacial GiST -> acelera ST_DWithin / ST_Distance.
 Index(
     "idx_lugares_ubicacion",
     Lugar.ubicacion,

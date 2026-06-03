@@ -20,7 +20,7 @@ import logging
 
 import certifi
 
-from .config import CATALOG_QUERY_URL, RAW_DIR
+from src.config import CATALOG_QUERY_URL, RAW_DIR
 
 logger = logging.getLogger(__name__)
 

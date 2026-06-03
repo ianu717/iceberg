@@ -18,7 +18,7 @@ la extensión PostGIS activada en la base:  CREATE EXTENSION IF NOT EXISTS postg
 import argparse
 import logging
 
-from . import extract, transform, load
+from src.etl import load, transform, extract
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger("pipeline")

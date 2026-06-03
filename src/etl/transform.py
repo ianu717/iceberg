@@ -12,7 +12,7 @@ import logging
 
 import pandas as pd
 
-from .config import RAW_DIR, PROCESSED_DIR, CATEGORY_MAP
+from src.config import RAW_DIR, PROCESSED_DIR, CATEGORY_MAP
 
 logger = logging.getLogger(__name__)
 
