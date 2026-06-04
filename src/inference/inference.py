@@ -1,8 +1,6 @@
-import json
 import pickle
 import numpy as np
 
-from src.utils import extract_profile_selection
 from src.config import MODEL_DIR
 
 def load_model_package():
@@ -54,17 +52,3 @@ def predict_user_profile(preferences: list[str], duration: str, companion: str) 
     x = build_feature_vector(preferences, duration, companion, model_package)
     prediction = predict_cluster(x, model_package)
     return prediction
-
-if __name__ == '__main__':
-    query_array = ['culture','local_favorites','walking_tours', 'threedays', 'partner']
-    preferences, duration, companion = extract_profile_selection(query_array)
-    profile = predict_user_profile(preferences, duration, companion)
-
-    print(f'Preferencias: {preferences}')
-    print(f'Duracion: {duration}')
-    print(f'Comañia: {companion}\n')
-    print('Perfil predicho:')
-    print(json.dumps(profile, indent=4, ensure_ascii=False))
-
-
-

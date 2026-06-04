@@ -3,12 +3,12 @@ from typing import Annotated
 from fastapi import FastAPI, APIRouter, Query, Depends
 from sqlalchemy.orm import Session
 from src.db.db import get_db
-from .schemas.api_schemas import RecommendationResponse, Recommendation
-from src.app.service.recomendation_service import recommend_by_profile
+from .schemas.api_schemas import RecommendationResponse
+from .service.recomendation_service import recommend_by_profile
 from src.utils import extract_profile_selection
 from src.inference.inference import predict_user_profile
 
-app = FastAPI(title=" API", version="0.1.0")
+api = FastAPI(title=" API", version="0.1.0")
 router = APIRouter(prefix="/api/v1")
 
 @router.get("/health")
@@ -26,8 +26,8 @@ def recommendations(
     predicted_profile = predict_user_profile(preferences, duration, companion)
     return recommend_by_profile(db, predicted_profile, latitude, longitude)
 
-@router.get("/inference/filter")
+@router.get("/recommendations/category", response_model=RecommendationResponse)
 def inference_filter(category: str, longitude: float, latitude: float):
-    return
+    return RecommendationResponse()
 
-app.include_router(router)
+api.include_router(router)

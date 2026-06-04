@@ -16,7 +16,7 @@ class Recommendation(BaseModel):
     google_rating: float = Field(ge=0, le=5)
     longitude: float = Field(ge=-180, le=180)
     latitude: float = Field(ge=-90, le=90)
-    distance_from_user: float = Field(ge=0, description="Distancia en metros")
+    distance_from_user: int = Field(ge=0, description="Distancia en metros")
     reviews: list[str] = Field(default_factory=list)
 
 class RecommendationResponse(BaseModel):

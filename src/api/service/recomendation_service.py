@@ -2,12 +2,11 @@ from sqlalchemy.orm import Session
 from geoalchemy2.functions import ST_DWithin, ST_Distance, ST_GeogFromText
 
 from src.db.models import Lugar
-from src.app.schemas.api_schemas import Recommendation, RecommendationResponse
+from src.api.schemas.api_schemas import Recommendation, RecommendationResponse
 
 
 def _a_recommendation(lugar: Lugar, distancia_m: float) -> Recommendation:
     """Mapea un Lugar de la BD al schema Recommendation."""
-    # local_ratio es 0-1 -> local_score 0-100 (entero). None -> 0.
     score = round((lugar.local_ratio or 0) * 100)
     return Recommendation(
         name=lugar.nombre,
@@ -17,7 +16,7 @@ def _a_recommendation(lugar: Lugar, distancia_m: float) -> Recommendation:
         google_rating=lugar.google_rating or 0,   # sin rating -> 0
         longitude=lugar.lon,
         latitude=lugar.lat,
-        distance_from_user=round(float(distancia_m), 1),
+        distance_from_user=int(distancia_m),
         reviews=[],                                # vacío de momento
     )
 

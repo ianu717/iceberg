@@ -12,4 +12,4 @@ set -e
 # Fallback a 8000 si PORT no viene definido (ejecución local).
 : "${PORT:=8000}"
 
-exec uvicorn src.app.main:app --host 0.0.0.0 --port "${PORT}"
+exec uvicorn src.api.main:api --host 0.0.0.0 --port "${PORT}"

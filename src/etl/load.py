@@ -23,13 +23,13 @@ from pathlib import Path
 
 import pandas as pd
 
-from db.db import engine, SessionLocal, Base
-from db.models import Lugar
+from src.db.db import engine, SessionLocal, Base
+from src.db.models import Lugar
 
 logger = logging.getLogger(__name__)
 
 # Ruta por defecto del CSV maestro. Ajusta si tu config usa otra.
-DEFAULT_CSV = Path("data/processed/aupa_master_v5.csv")
+DEFAULT_CSV = Path("data/processed/aupa_master_v6.csv")
 
 
 def _punto_wkt(lat, lon):
