@@ -23,8 +23,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.db import engine, SessionLocal, Base
-from src.models import Lugar
+from db.db import engine, SessionLocal, Base
+from db.models import Lugar
 
 logger = logging.getLogger(__name__)
 

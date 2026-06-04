@@ -1,7 +1,3 @@
-"""
-config.py - Rutas y constantes compartidas del pipeline.
-"""
-
 from pathlib import Path
 
 # Raíz del proyecto (un nivel por encima de src/).
@@ -9,8 +5,9 @@ ROOT = Path(__file__).resolve().parent.parent
 
 DATA_DIR = ROOT / "data"
 PROCESSED_DIR = DATA_DIR / "processed"
-RAW_DIR = DATA_DIR / "raw"          # JSONs crudos de Open Data Euskadi             # dataset maestro procesado
-
+RAW_DIR = DATA_DIR / "raw"
+# JSONs crudos de Open Data Euskadi             # dataset maestro procesado
+MODEL_DIR = ROOT / "model"
 # Query del catálogo de Open Data Euskadi que lista los datasets turísticos.
 CATALOG_QUERY_URL = (
     "https://opendata.euskadi.eus/catalogo-datos/"

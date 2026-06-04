@@ -1,20 +1,6 @@
-"""
-models.py - Modelos de datos (SQLAlchemy ORM) para Txoko/Aupa.
-
-El modelo Lugar representa un punto de interés del dataset maestro
-(aupa_master_v5). Incluye:
-  - datos base (nombre, categoría, ubicación administrativa)
-  - columna geográfica PostGIS (ubicacion) para "cerca de mí"
-  - datos de Google (place_id, rating, num_reviews)
-  - señales del modelo de ML (signal_*, local_ratio...)
-  - flags y recomendaciones por perfil (rec_*)
-"""
-
 from sqlalchemy import Column, Integer, String, Float, Text, Boolean, Index
 from geoalchemy2 import Geography
-
 from .db import Base
-
 
 class Lugar(Base):
     __tablename__ = "lugares"
