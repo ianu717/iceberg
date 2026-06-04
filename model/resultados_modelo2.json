@@ -1,0 +1,127 @@
+{
+  "modelo": "KMeans",
+  "version": "2.0",
+  "k_optimo": 3,
+  "silhouette": 0.3479,
+  "n_usuarios_sinteticos": 1000,
+  "dims": [
+    "food",
+    "culture",
+    "nature",
+    "bars",
+    "local_favorites",
+    "shopping",
+    "coffee_shops",
+    "walking_tours",
+    "family_friendly",
+    "vegetarian_vegan",
+    "history",
+    "festivals_events",
+    "beaches",
+    "nightlife",
+    "budget_friendly",
+    "duration",
+    "companion"
+  ],
+  "nota_diseno": "Sintéticos con distribución Beta continua para maximizar separabilidad. Producción: 3 prefs binarias + duration/companion ordinales [0.25-1.0]. El StandardScaler normaliza ambos al mismo espacio.",
+  "clusters": {
+    "0": {
+      "nombre": "Txoko Social",
+      "n": 400,
+      "top5_prefs": {
+        "bars": 0.871,
+        "food": 0.791,
+        "local_favorites": 0.637,
+        "nightlife": 0.612,
+        "coffee_shops": 0.529
+      }
+    },
+    "1": {
+      "nombre": "Mendi & Familia",
+      "n": 400,
+      "top5_prefs": {
+        "nature": 0.814,
+        "budget_friendly": 0.698,
+        "beaches": 0.688,
+        "family_friendly": 0.675,
+        "walking_tours": 0.575
+      }
+    },
+    "2": {
+      "nombre": "Kultura",
+      "n": 200,
+      "top5_prefs": {
+        "culture": 0.912,
+        "history": 0.879,
+        "walking_tours": 0.773,
+        "festivals_events": 0.699,
+        "local_favorites": 0.562
+      }
+    }
+  },
+  "cluster_to_categorias": {
+    "Txoko Social": {
+      "subcategorias": [
+        "Restaurantes / Asadores / Sidrerías",
+        "Bares de pintxos",
+        "Queserías / Conserveras / Productores",
+        "Gastronomía general",
+        "Tiendas gourmet y enotecas",
+        "Pastelerías y confiterías",
+        "Ocio general",
+        "Hipódromos y estadios",
+        "Recintos feriales"
+      ],
+      "vibes": [
+        "For Foodies",
+        "Local Favorites",
+        "Pintxo Crawl"
+      ],
+      "companion_hint": "pareja o amigos",
+      "duration_hint": "2-3 días"
+    },
+    "Mendi & Familia": {
+      "subcategorias": [
+        "Alojamientos rurales",
+        "Recursos deportivos",
+        "Turismo activo (kayak, surf, escalada...)",
+        "Espacios naturales",
+        "Parques naturales",
+        "Campings",
+        "Alquiler deportivo",
+        "Rutas y paseos",
+        "Puertos deportivos / Náutica",
+        "Centros BTT",
+        "Palacios de hielo",
+        "Parques de atracciones",
+        "Aquariums",
+        "Turismo de salud / Spas"
+      ],
+      "vibes": [
+        "For the Outdoors",
+        "Family Day",
+        "Active Weekend"
+      ],
+      "companion_hint": "familia o amigos",
+      "duration_hint": "4-7 días"
+    },
+    "Kultura": {
+      "subcategorias": [
+        "Museos y centros de interpretación",
+        "Edificios religiosos / Castillos",
+        "Recursos culturales generales",
+        "Cuevas y restos arqueológicos",
+        "Auditorios",
+        "Palacios de congresos",
+        "Patrimonio y recursos culturales"
+      ],
+      "vibes": [
+        "For Culture Lovers",
+        "Walking Tours",
+        "History & Art"
+      ],
+      "companion_hint": "pareja o solo",
+      "duration_hint": "1-3 días"
+    }
+  }
+}
