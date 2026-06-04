@@ -1,6 +1,6 @@
 # 🧊 Iceberg — Más allá del Guggen
 
-> **Equipo 4 · Proyecto Desafío**  
+> **Equipo 4 · Desafío de Tripulaciones**  
 > API REST geoespacial con análisis de datos y modelos predictivos, desplegada en Render.
 
 ---
