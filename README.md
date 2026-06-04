@@ -1,53 +1,132 @@
-# 🧊 Iceberg — Más allá del Guggen
+# 🧊 Aupa — Más allá del Guggen
 
-> **Equipo 4 · Desafío de Tripulaciones**  
-> API REST geoespacial con análisis de datos y modelos predictivos, desplegada en Render.
+> **Reto Inetum · Bootcamp BBK The Bridge · Equipo 4 Data · Desafío de Tripulaciones**  
+> API REST + modelos ML para descubrir los lugares más auténticos del País Vasco.
+
+---
+
+## 🎯 Concepto
+
+**La hipótesis del iceberg**: los mejores sitios del País Vasco no son los más populares ni los más visibles. Están ocultos debajo de la superficie del turismo masivo — alta valoración, pocas reseñas. **Aupa** los encuentra.
+
+La app asigna a cada lugar un **Local Score** (0–1) que mide su autenticidad local. Cuando el usuario hace el onboarding, el sistema lo clasifica en uno de **3 perfiles** y le muestra los lugares ordenados por relevancia para él.
+
+---
+
+## 👥 Equipo
+
+| Rol | Nombre |
+|---|---|
+| Lead | Naia |
+| Data | Andoni |
+| API & Git Master | Unai |
+| Data | Fátima |
 
 ---
 
 ## 📋 Tabla de contenidos
 
-- [Descripción](#descripción)
-- [Arquitectura del proyecto](#arquitectura-del-proyecto)
+- [Arquitectura](#arquitectura)
+- [Modelos ML](#modelos-ml)
+  - [Modelo 1: Local Score](#modelo-1-local-score-gradientboosting)
+  - [Modelo 2: Clustering de usuarios](#modelo-2-clustering-de-usuarios-kmeans)
 - [Stack tecnológico](#stack-tecnológico)
-- [Requisitos previos](#requisitos-previos)
+- [Estructura del repositorio](#estructura-del-repositorio)
 - [Instalación y desarrollo local](#instalación-y-desarrollo-local)
 - [Ejecución con Docker](#ejecución-con-docker)
 - [Variables de entorno](#variables-de-entorno)
 - [Despliegue en Render](#despliegue-en-render)
 - [API — Endpoints](#api--endpoints)
-- [Notebooks y análisis](#notebooks-y-análisis)
-- [Estructura del repositorio](#estructura-del-repositorio)
-- [Equipo](#equipo)
 
 ---
 
-## Descripción
-
-**Iceberg** es el backend del proyecto de análisis de datos del Equipo 4. Su nombre refleja la idea de que la mayor parte del valor de los datos se encuentra debajo de la superficie —más allá del icono más visible de Bilbao.
-
-El proyecto expone una API REST construida con **FastAPI** que sirve datos geoespaciales almacenados en **PostgreSQL + PostGIS**, incluyendo modelos de machine learning entrenados con **scikit-learn** y análisis exploratorios generados con **Pandas**, **Seaborn** y **Sweetviz**.
-
----
-
-## Arquitectura del proyecto
+## Arquitectura
 
 ```
-Cliente / Frontend
-        │
+Usuario (onboarding)
+        │  elige 3 prefs + duración + compañía
         ▼
   FastAPI (Uvicorn)
         │
-        ├── Rutas / Endpoints
-        │       │
-        │       ├── SQLAlchemy + GeoAlchemy2
-        │       │         │
-        │       │         └── PostgreSQL + PostGIS (Render)
-        │       │
-        │       └── Modelos ML (scikit-learn)
+        ├── /score  ──►  GradientBoosting  ──►  Local Score [0–1]
+        │                (modelo_localscore.pkl)
         │
-        └── Pydantic (validación de datos)
+        ├── /profile ──► KMeans + StandardScaler ──► Perfil de usuario
+        │                (modelo_clustering.pkl)      (Txoko Social /
+        │                                              Mendi & Familia /
+        │                                              Kultura)
+        │
+        └── SQLAlchemy + GeoAlchemy2
+                   │
+                   └── PostgreSQL + PostGIS (Render)
+                       Catálogo de lugares del País Vasco
 ```
+
+---
+
+## Modelos ML
+
+### Modelo 1: Local Score (GradientBoosting)
+
+Calcula cuán "local" es un lugar en una escala 0–1.
+
+**Features y su importancia:**
+
+| Feature | Descripción | Importancia |
+|---|---|---|
+| `signal_category` | Tipo de lugar (sidrería, alojamiento, oficina…) | **43.5 %** |
+| `signal_hidden` | Lugar sin presencia Google = joya oculta | **26.4 %** |
+| `has_google_data` | ¿Tiene ficha Google? | ~15 % |
+| `google_num_reviews` | Nº de reseñas (volumen) | ~10 % |
+| `google_rating` | Puntuación Google | ~5 % |
+| `signal_municipality` | Penalización por municipio turístico | 0.6 % |
+| `signal_language_norm` | Idioma de las reseñas | 0.2 %* |
+
+> \* Varianza casi nula en datos actuales: 97.1 % de las reseñas están en español. Mejorará en producción con más diversidad de datos.
+
+**Rangos del Local Score:**
+
+| Rango | Etiqueta |
+|---|---|
+| < 0.55 | 🔴 Turístico |
+| 0.55 – 0.65 | 🟠 Mixto |
+| 0.65 – 0.75 | 🔵 Local |
+| > 0.75 | 🟢 Joya local |
+
+**Métricas del modelo:**
+
+- R² (CV 5-fold): validado con `KFold(n_splits=5, shuffle=True)`
+- Algoritmo: `GradientBoostingRegressor(n_estimators=300, max_depth=4, learning_rate=0.05, subsample=0.8)`
+- Output: `model/modelo_localscore.pkl`, `model/resultados_modelo1.json`
+
+---
+
+### Modelo 2: Clustering de usuarios (KMeans)
+
+Segmenta a cada usuario en un perfil de viaje basándose en su onboarding.
+
+**Vector de usuario — 17 dimensiones:**
+
+| Bloque | Dimensiones | Valores en producción |
+|---|---|---|
+| Preferencias | 15 | Binario: el usuario elige exactamente **3** de 15 |
+| Duración (`duration`) | 1 | `oneday` / `threedays` / `oneweek` / `longstay` |
+| Compañía (`companion`) | 1 | `solo` / `partner` / `friends` / `family` |
+
+**Las 15 preferencias disponibles:**
+`food`, `culture`, `nature`, `bars`, `local_favorites`, `shopping`, `coffee_shops`, `walking_tours`, `family_friendly`, `vegetarian_vegan`, `history`, `festivals_events`, `beaches`, `nightlife`, `budget_friendly`
+
+**Resultado del clustering — K=3 (óptimo por codo + silhouette + Davies-Bouldin):**
+
+| Cluster | Nombre | Arquetipos fusionados | Color |
+|---|---|---|---|
+| 0 | 🍻 **Txoko Social** | Gastronómico + Nocturno | `#D85A30` |
+| 1 | 🏔️ **Mendi & Familia** | Naturaleza + Familiar | `#1A9E72` |
+| 2 | 🎭 **Kultura** | Cultural (perfectamente separado) | `#7B5EA7` |
+
+**Entrenamiento:** 1.000 usuarios sintéticos (5 arquetipos × 200, distribución Beta). El `StandardScaler` aprende sobre los sintéticos y aplica la misma transformación a los vectores reales de producción.
+
+- Output: `model/modelo_clustering.pkl`, `model/scaler_clustering.pkl`, `model/resultados_modelo2.json`
 
 ---
 
@@ -56,24 +135,49 @@ Cliente / Frontend
 | Capa | Tecnología |
 |---|---|
 | API | FastAPI + Uvicorn |
-| Base de datos | PostgreSQL + PostGIS (GeoAlchemy2) |
-| ORM | SQLAlchemy |
-| Machine Learning | scikit-learn, NumPy, Pandas |
-| Visualización | Seaborn, Sweetviz |
+| Modelos ML | scikit-learn (GradientBoosting, KMeans, StandardScaler, PCA) |
+| Análisis | Pandas, NumPy, Seaborn, Sweetviz |
+| Base de datos | PostgreSQL + PostGIS |
+| ORM | SQLAlchemy + GeoAlchemy2 |
 | Validación | Pydantic |
-| Gestor de paquetes | [uv](https://github.com/astral-sh/uv) |
-| Contenerización | Docker (multi-stage build) |
+| Gestor de paquetes | [uv](https://docs.astral.sh/uv/) |
+| Contenedor | Docker (multi-stage build) |
 | Despliegue | [Render](https://render.com) |
 | Python | 3.11+ |
 
 ---
 
-## Requisitos previos
+## Estructura del repositorio
 
-- Python **3.11** o superior
-- [`uv`](https://docs.astral.sh/uv/getting-started/installation/) instalado
-- Docker (opcional, para ejecutar en contenedor)
-- Una instancia de PostgreSQL con la extensión PostGIS habilitada
+```
+iceberg/
+├── model/                        # Modelos serializados y métricas
+│   ├── modelo_localscore.pkl     # Modelo 1: GradientBoosting
+│   ├── modelo_clustering.pkl     # Modelo 2: KMeans
+│   ├── scaler_clustering.pkl     # StandardScaler del clustering
+│   ├── resultados_modelo1.json   # Métricas Local Score
+│   └── resultados_modelo2.json   # Métricas Clustering
+│
+├── notebooks/                    # Análisis y entrenamiento
+│   ├── aupa_analisis.ipynb       # EDA + 4 hallazgos principales
+│   ├── modelo_localscore.ipynb   # Entrenamiento Modelo 1
+│   ├── modelo_clustering.ipynb   # Entrenamiento Modelo 2
+│   └── modelo_clustering_graficos.ipynb  # Visualizaciones clustering
+│
+├── reports/                      # Gráficas exportadas (figuras_ls/, figuras_cl/)
+│
+├── src/
+│   └── app/
+│       └── main.py               # Entrada de la aplicación FastAPI
+│
+├── .dockerignore
+├── .gitignore
+├── .python-version               # Python 3.11
+├── Dockerfile                    # Build multi-stage con uv
+├── entrypoint.sh                 # Arranque Uvicorn para Render/Docker
+├── pyproject.toml                # Dependencias del proyecto
+└── uv.lock                       # Lock de dependencias
+```
 
 ---
 
@@ -86,7 +190,7 @@ git clone https://github.com/ianu717/iceberg.git
 cd iceberg
 ```
 
-### 2. Instalar dependencias con `uv`
+### 2. Instalar dependencias
 
 ```bash
 uv sync
@@ -94,7 +198,7 @@ uv sync
 
 ### 3. Configurar variables de entorno
 
-Crea un archivo `.env` en la raíz del proyecto (ver sección [Variables de entorno](#variables-de-entorno)).
+Crea un archivo `.env` en la raíz (ver sección [Variables de entorno](#variables-de-entorno)).
 
 ### 4. Ejecutar la API
 
@@ -102,28 +206,31 @@ Crea un archivo `.env` en la raíz del proyecto (ver sección [Variables de ento
 uv run uvicorn src.app.main:app --reload --port 8000
 ```
 
-La API estará disponible en `http://localhost:8000`.  
-La documentación interactiva (Swagger UI) en `http://localhost:8000/docs`.
+- API: `http://localhost:8000`
+- Swagger UI: `http://localhost:8000/docs`
+- ReDoc: `http://localhost:8000/redoc`
+
+### 5. Ejecutar los notebooks
+
+```bash
+uv run jupyter lab
+```
 
 ---
 
 ## Ejecución con Docker
 
-### Build de la imagen
-
 ```bash
-docker build -t iceberg .
-```
+# Build
+docker build -t aupa-api .
 
-### Ejecutar el contenedor
-
-```bash
+# Run
 docker run -p 8000:8000 \
   -e DATABASE_URL="postgresql://user:password@host/dbname" \
-  iceberg
+  aupa-api
 ```
 
-> El Dockerfile usa un **build multi-stage** para mantener la imagen final ligera. El `entrypoint.sh` arranca Uvicorn respetando la variable `$PORT` inyectada por Render (fallback a `8000` en local).
+> El Dockerfile usa un **build multi-stage** (builder con `uv` + imagen final `python:3.11-slim`). El `entrypoint.sh` arranca Uvicorn respetando la variable `$PORT` de Render, con fallback a `8000` en local.
 
 ---
 
@@ -132,80 +239,37 @@ docker run -p 8000:8000 \
 | Variable | Descripción | Requerida |
 |---|---|---|
 | `DATABASE_URL` | URL de conexión a PostgreSQL (`postgresql://...`) | ✅ |
-| `PORT` | Puerto en el que escucha la API (Render lo inyecta automáticamente) | ⚙️ Auto |
+| `PORT` | Puerto de escucha (Render lo inyecta automáticamente) | ⚙️ Auto |
 
 Ejemplo de `.env` para desarrollo local:
 
 ```env
-DATABASE_URL=postgresql://postgres:password@localhost:5432/iceberg_db
+DATABASE_URL=postgresql://postgres:password@localhost:5432/aupa_db
 ```
 
-> ⚠️ **Nunca** commits el archivo `.env`. Está incluido en `.gitignore`.
+> ⚠️ El `.env` está en `.gitignore`. Nunca lo subas al repositorio.
 
 ---
 
 ## Despliegue en Render
 
-El proyecto está configurado para desplegarse directamente en [Render](https://render.com) como un **Web Service** a partir del `Dockerfile`.
+El proyecto se despliega en [Render](https://render.com) como **Web Service** a partir del `Dockerfile`.
 
-Render se encarga de:
-- Construir la imagen Docker automáticamente en cada push a `main`
-- Inyectar la variable `PORT` en runtime
-- Proveer la base de datos PostgreSQL gestionada (la URL se configura como variable de entorno en el panel de Render)
-
-Para redeploy manual, basta con hacer push a la rama `main`.
+Render gestiona automáticamente:
+- Build de la imagen Docker en cada push a `main`
+- Inyección de `$PORT` en runtime
+- Base de datos PostgreSQL gestionada (la `DATABASE_URL` se configura en el panel de Render como variable de entorno)
 
 ---
 
 ## API — Endpoints
 
-La documentación completa y autogerada está disponible en `/docs` (Swagger UI) y `/redoc` una vez levantada la API.
+La documentación completa está disponible en `/docs` (Swagger UI) y `/redoc` con la API en marcha.
 
 > **URL de producción:** `https://<tu-servicio>.onrender.com`
 
 ---
 
-## Notebooks y análisis
-
-El directorio `notebooks/` contiene los análisis exploratorios (EDA) realizados durante el desarrollo del proyecto. Los informes generados se guardan en `reports/`.
-
-Para ejecutar los notebooks:
-
-```bash
-uv run jupyter lab
-```
-
----
-
-## Estructura del repositorio
-
-```
-iceberg/
-├── model/              # Modelos ML serializados
-├── notebooks/          # Jupyter Notebooks (EDA y análisis)
-├── reports/            # Informes y visualizaciones exportadas
-├── src/
-│   └── app/
-│       └── main.py     # Punto de entrada de la aplicación FastAPI
-├── .dockerignore
-├── .gitignore
-├── .python-version     # Python 3.11
-├── Dockerfile          # Build multi-stage con uv
-├── entrypoint.sh       # Script de arranque para Render/Docker
-├── pyproject.toml      # Configuración del proyecto y dependencias
-└── uv.lock             # Dependencias bloqueadas (no editar manualmente)
-```
-
----
-
-## Equipo
-
-**Equipo 4 — "Más allá del Guggen"**
-
-Proyecto desarrollado como parte de un Desafío de análisis de datos y desarrollo de APIs.
-
----
-
 <div align="center">
-  <sub>Hecho con 🧊 en Bilbao</sub>
+  <sub>Hecho con 🧊 en Bilbao · Reto Inetum · BBK The Bridge · Equipo 4</sub>
 </div>
