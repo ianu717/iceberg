@@ -8,6 +8,7 @@
 ## 🎯 Concepto
 
 **Problema que resuelve**
+
 Los turistas llegan al País Vasco y enfrentan 3 fricciones concretas:
 
 No saben ubicarse — no conocen la ciudad, no saben qué hay cerca ni cómo moverse.
