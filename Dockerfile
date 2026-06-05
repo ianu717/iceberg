@@ -64,8 +64,7 @@ FROM python:3.11-slim-bookworm
 # Librería de runtime de PostgreSQL (libpq) necesaria porque
 # psycopg2 enlaza dinámicamente contra ella. NO instalamos la
 # versión -dev aquí: solo la librería compartida de runtime.
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        libpq5 \
+RUN apt-get update && apt-get install -y --no-install-recommends libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

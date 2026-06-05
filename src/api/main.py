@@ -20,7 +20,7 @@ def recommendations(
         categories: Annotated[list[str], Query(min_length=5, max_length=5)],
         longitude: Annotated[float, Query(ge=-180, le=180)],
         latitude: Annotated[float, Query(ge=-90, le=90)],
-        db: Session = Depends(get_db)
+        db: Annotated[Session, Depends(get_db)]
 ):
     preferences, duration, companion = extract_profile_selection(categories)
     predicted_profile = predict_user_profile(preferences, duration, companion)
@@ -31,7 +31,7 @@ def recommendations_category(
         category: Annotated[str, Query()],
         longitude: Annotated[float, Query(ge=-180, le=180)],
         latitude: Annotated[float, Query(ge=-90, le=90)],
-        db: Session = Depends(get_db)
+        db: Annotated[Session, Depends(get_db)]
 ):
     return recommend_by_category(db, category, latitude, longitude)
 
