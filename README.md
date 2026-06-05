@@ -78,7 +78,7 @@ Usuario (onboarding)
 
 ### Modelo 1: Local Score (GradientBoosting)
 
-Calcula cuán "local" es un lugar en una escala 0–1.
+Calcula cómo de "local" es un lugar en una escala 0–1.
 
 **Features y su importancia:**
 
