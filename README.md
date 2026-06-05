@@ -1,11 +1,20 @@
 # 🧊 Aupa — Más allá del Guggen
 
 > **Reto Inetum · Bootcamp BBK The Bridge · Equipo 4 Data · Desafío de Tripulaciones**  
-> API REST + modelos ML para descubrir los lugares más auténticos del País Vasco.
+> Aupa es una plataforma web/app para el País Vasco orientada a turistas que quieren descubrir lugares, establecimientos y actividades de forma auténtica. Desarrollada como respuesta al Reto Inetum dentro del Bootcamp BBK The Bridge.
 
 ---
 
 ## 🎯 Concepto
+
+**Problema que resuelve**
+Los turistas llegan al País Vasco y enfrentan 3 fricciones concretas:
+
+No saben ubicarse — no conocen la ciudad, no saben qué hay cerca ni cómo moverse.
+Buscan lo inmediato — su consulta real es "lo mejor cerca de mí ahora mismo".
+Confían ciegamente en valoraciones — siguen Google Maps o TripAdvisor, que priorizan volumen de reseñas, no autenticidad local.
+
+El resultado: todos van a los mismos sitios. El turista genuino queda frustrado.
 
 **La hipótesis del iceberg**: los mejores sitios del País Vasco no son los más populares ni los más visibles. Están ocultos debajo de la superficie del turismo masivo — alta valoración, pocas reseñas. **Aupa** los encuentra.
 
