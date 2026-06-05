@@ -75,7 +75,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 # Copiar el entrypoint y darle permisos de ejecución.
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
 
 # Dar permisos de ejecución al entrypoint y crear el usuario no root
 # en una sola instrucción RUN (buena práctica de seguridad y se

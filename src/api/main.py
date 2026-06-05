@@ -4,7 +4,7 @@ from fastapi import FastAPI, APIRouter, Query, Depends
 from sqlalchemy.orm import Session
 from src.db.db import get_db
 from .schemas.api_schemas import RecommendationResponse
-from .service.recomendation_service import recommend_by_profile
+from .service.recomendation_service import recommend_by_profile, recommend_by_category
 from src.utils import extract_profile_selection
 from src.inference.inference import predict_user_profile
 
@@ -27,7 +27,12 @@ def recommendations(
     return recommend_by_profile(db, predicted_profile, latitude, longitude)
 
 @router.get("/recommendations/category", response_model=RecommendationResponse)
-def inference_filter(category: str, longitude: float, latitude: float):
-    return RecommendationResponse()
+def recommendations_category(
+        category: Annotated[str, Query()],
+        longitude: Annotated[float, Query(ge=-180, le=180)],
+        latitude: Annotated[float, Query(ge=-90, le=90)],
+        db: Session = Depends(get_db)
+):
+    return recommend_by_category(db, category, latitude, longitude)
 
 api.include_router(router)

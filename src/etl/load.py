@@ -29,7 +29,7 @@ from src.db.models import Lugar
 logger = logging.getLogger(__name__)
 
 # Ruta por defecto del CSV maestro. Ajusta si tu config usa otra.
-DEFAULT_CSV = Path("data/processed/aupa_master_v6.csv")
+DEFAULT_CSV = Path("data/processed/aupa_master_v7.csv")
 
 
 def _punto_wkt(lat, lon):
