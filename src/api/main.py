@@ -8,7 +8,7 @@ from .service.recomendation_service import recommend_by_profile, recommend_by_ca
 from src.utils import extract_profile_selection
 from src.inference.inference import predict_user_profile
 
-api = FastAPI(title=" API", version="0.1.0")
+api = FastAPI(title="Iceberg API", version="0.1.0")
 router = APIRouter(prefix="/api/v1")
 
 @router.get("/health")
