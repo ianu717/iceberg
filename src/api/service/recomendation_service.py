@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 from geoalchemy2.functions import ST_DWithin, ST_Distance, ST_GeogFromText
-
 from src.db.models import Lugar
 from src.api.schemas.api_schemas import Recommendation, RecommendationResponse
 
@@ -61,13 +60,22 @@ def _a_recommendation(lugar: Lugar, distancia_m: float) -> Recommendation:
         name=lugar.nombre,
         description=lugar.descripcion or "",
         local_score=score,
-        category=lugar.subcategoria if lugar.subcategoria else '',
+        categories=find_categories(lugar.subcategoria) or [],
+        sub_category=lugar.subcategoria if lugar.subcategoria else '',
         google_rating=lugar.google_rating or 0,   # sin rating -> 0
         longitude=lugar.lon,
         latitude=lugar.lat,
         distance_from_user=int(distancia_m),
         reviews=[],                                # vacío de momento
     )
+
+def find_categories(subcategoria: str) -> list[str]:
+    """Devuelve todas las categorías (keys) que contienen esa subcategoría."""
+    return [
+        category
+        for category, subcats in CATEGORY_MAPPING.items()
+        if subcategoria in subcats
+    ]
 
 def recommend_by_profile(
     db: Session,
@@ -167,3 +175,26 @@ def recommend_by_category(
         response = recommend_by_category_map(db, category, lat, lon, top_n=top_n)
 
     return response
+
+def recommend_nearest(
+    db: Session,
+    lat: float,
+    lon: float,
+    top_n: int = 24,
+) -> RecommendationResponse:
+    top_n = min(top_n, 24)
+
+    punto = ST_GeogFromText(f"POINT({lon} {lat})")
+    distancia = ST_Distance(Lugar.ubicacion, punto).label("distancia_m")
+
+    filas = (
+        db.query(Lugar, distancia)
+        .filter(Lugar.ubicacion.isnot(None))
+        .order_by(distancia.asc())
+        .limit(top_n)
+        .all()
+    )
+
+    recomendaciones = [_a_recommendation(lugar, dist) for lugar, dist in filas]
+
+    return RecommendationResponse(recommendations=recomendaciones)

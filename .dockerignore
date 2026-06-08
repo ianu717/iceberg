@@ -48,3 +48,5 @@ data
 # Docker
 Dockerfile*
 docker-compose*
+
+src/chat/

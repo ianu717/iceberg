@@ -1002,50 +1002,62 @@ source = { virtual = "." }
 dependencies = [
     { name = "certifi" },
     { name = "dotenv" },
-    { name = "faiss-cpu" },
     { name = "fastapi", extra = ["standard"] },
     { name = "geoalchemy2" },
-    { name = "groq" },
-    { name = "ipykernel" },
-    { name = "langdetect" },
     { name = "numpy" },
     { name = "pandas" },
-    { name = "protobuf" },
     { name = "psycopg2" },
     { name = "pydantic" },
     { name = "requests" },
     { name = "scikit-learn" },
-    { name = "seaborn" },
-    { name = "sentence-transformers" },
     { name = "sqlalchemy" },
-    { name = "sweetviz" },
     { name = "tqdm" },
     { name = "uvicorn" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "ipykernel" },
+    { name = "seaborn" },
+    { name = "sweetviz" },
+]
+rag = [
+    { name = "faiss-cpu" },
+    { name = "groq" },
+    { name = "langdetect" },
+    { name = "protobuf" },
+    { name = "sentence-transformers" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "certifi", specifier = ">=2026.5.20" },
     { name = "dotenv", specifier = ">=0.9.9" },
-    { name = "faiss-cpu", specifier = ">=1.14.2" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.136.3" },
     { name = "geoalchemy2", specifier = ">=0.20.0" },
-    { name = "groq", specifier = ">=1.4.0" },
-    { name = "ipykernel", specifier = ">=7.2.0" },
-    { name = "langdetect", specifier = ">=1.0.9" },
     { name = "numpy", specifier = ">=2.4.6" },
     { name = "pandas", specifier = ">=3.0.3" },
-    { name = "protobuf", specifier = ">=7.35.0" },
     { name = "psycopg2", specifier = ">=2.9.12" },
     { name = "pydantic", specifier = ">=2.13.4" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "scikit-learn", specifier = ">=1.9.0" },
-    { name = "seaborn", specifier = ">=0.13.2" },
-    { name = "sentence-transformers", specifier = ">=5.5.1" },
     { name = "sqlalchemy", specifier = ">=2.0.50" },
-    { name = "sweetviz", specifier = ">=2.3.3" },
     { name = "tqdm", specifier = ">=4.67.3" },
     { name = "uvicorn", specifier = ">=0.48.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "ipykernel", specifier = ">=7.2.0" },
+    { name = "seaborn", specifier = ">=0.13.2" },
+    { name = "sweetviz", specifier = ">=2.3.3" },
+]
+rag = [
+    { name = "faiss-cpu", specifier = ">=1.14.2" },
+    { name = "groq", specifier = ">=1.4.0" },
+    { name = "langdetect", specifier = ">=1.0.9" },
+    { name = "protobuf", specifier = ">=7.35.0" },
+    { name = "sentence-transformers", specifier = ">=5.5.1" },
 ]
 
 [[package]]

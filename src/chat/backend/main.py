@@ -8,7 +8,7 @@ import faiss
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
-
+from fastapi.middleware.cors import CORSMiddleware
 from .chat.config import EMBEDDING_MODEL
 from .chat.index_loader import load_faiss_index, load_metadata
 from .chat.llm import call_llm, init_llm
@@ -56,6 +56,12 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ── Schemas ────────────────────────────────────────────────────────────────
 

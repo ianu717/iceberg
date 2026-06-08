@@ -12,7 +12,8 @@ class Recommendation(BaseModel):
     name: str
     description: str
     local_score: int = Field(ge=0,  le=100)
-    category: str
+    categories: list[str]
+    sub_category: str
     google_rating: float = Field(ge=0, le=5)
     longitude: float = Field(ge=-180, le=180)
     latitude: float = Field(ge=-90, le=90)

@@ -68,19 +68,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+# Crear el usuario ANTES de copiar, para poder usar --chown en el COPY.
+RUN useradd --create-home appuser
 
-COPY --from=builder /app /app
+# Copiar ya con el propietario correcto (no crea capa extra como el chown -R).
+COPY --from=builder --chown=appuser:appuser /app /app
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Copiar el entrypoint y darle permisos de ejecución.
-COPY entrypoint.sh /app/entrypoint.sh
+# Entrypoint con permisos de ejecución en el propio COPY.
+COPY --chown=appuser:appuser --chmod=755 entrypoint.sh /app/entrypoint.sh
 
-# Dar permisos de ejecución al entrypoint y crear el usuario no root
-# en una sola instrucción RUN (buena práctica de seguridad y se
-# reduce el número de capas de la imagen).
-RUN chmod +x /app/entrypoint.sh \
-    && useradd --create-home appuser \
-    && chown -R appuser:appuser /app
 USER appuser
 
 # Render asigna el puerto vía $PORT. EXPOSE es informativo;
