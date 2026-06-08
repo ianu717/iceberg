@@ -161,32 +161,63 @@ Segmenta a cada usuario en un perfil de viaje basándose en su onboarding.
 
 ```
 iceberg/
-├── model/                        # Modelos serializados y métricas
-│   ├── modelo_localscore.pkl     # Modelo 1: GradientBoosting
-│   ├── modelo_clustering.pkl     # Modelo 2: KMeans
-│   ├── scaler_clustering.pkl     # StandardScaler del clustering
-│   ├── resultados_modelo1.json   # Métricas Local Score
-│   └── resultados_modelo2.json   # Métricas Clustering
+├── model/
+│   ├── modelo_clustering.pkl       # KMeans serializado
+│   └── resultados_modelo2.json     # Métricas del clustering
 │
-├── notebooks/                    # Análisis y entrenamiento
-│   ├── aupa_analisis.ipynb       # EDA + 4 hallazgos principales
-│   ├── modelo_localscore.ipynb   # Entrenamiento Modelo 1
-│   ├── modelo_clustering.ipynb   # Entrenamiento Modelo 2
-│   └── modelo_clustering_graficos.ipynb  # Visualizaciones clustering
+├── notebooks/
+│   ├── aupa_analisis.ipynb                    # EDA + 4 hallazgos principales
+│   ├── modelo_clustering.ipynb                # Entrenamiento KMeans
+│   ├── modelo_localscore.ipynb                # Construcción del Local Score
+│   ├── MapeoNearby.ipynb                      # Análisis geoespacial de proximidad
+│   ├── txoko_pipeline_datos.ipynb             # Pipeline de datos maestro
+│   ├── txoko_google_places.ipynb              # Enriquecimiento Google Places API
+│   ├── txoko_google_reviews_enrich....ipynb   # Enriquecimiento reseñas Google
+│   ├── txoko_enrichment_provenanc....ipynb    # Proveniencia del enriquecimiento
+│   ├── txoko_master_enriched_v2.csv           # Dataset enriquecido intermedio
+│   └── eda_txoko.html                         # Informe EDA (Sweetviz)
 │
-├── reports/                      # Gráficas exportadas (figuras_ls/, figuras_cl/)
+├── reports/                        # Figuras exportadas del clustering
+│   ├── fig_distribucion_perfiles.png
+│   ├── fig_elbow_silhouette.png
+│   ├── fig_radar_clusters.png
+│   └── fig_silhouette_analysis.png
 │
 ├── src/
-│   └── app/
-│       └── main.py               # Entrada de la aplicación FastAPI
+│   ├── api/
+│   │   ├── schemas/
+│   │   │   ├── __init__.py
+│   │   │   └── api_schemas.py          # Schemas Pydantic (request/response)
+│   │   ├── service/
+│   │   │   ├── __init__.py
+│   │   │   └── recomendation_service.py  # Lógica de recomendación
+│   │   ├── __init__.py
+│   │   └── main.py                     # ← Entry point FastAPI
+│   ├── db/
+│   │   ├── __init__.py
+│   │   ├── db.py                       # Conexión a PostgreSQL
+│   │   └── models.py                   # Modelos SQLAlchemy
+│   ├── etl/
+│   │   ├── __init__.py
+│   │   ├── extract.py
+│   │   ├── transform.py
+│   │   ├── load.py
+│   │   └── pipeline.py                 # Orquestador ETL
+│   ├── inference/
+│   │   ├── __init__.py
+│   │   └── inference.py                # Carga modelos y ejecuta predicciones
+│   ├── __init__.py
+│   ├── config.py                       # Variables de configuración
+│   └── utils.py
 │
 ├── .dockerignore
 ├── .gitignore
-├── .python-version               # Python 3.11
-├── Dockerfile                    # Build multi-stage con uv
-├── entrypoint.sh                 # Arranque Uvicorn para Render/Docker
-├── pyproject.toml                # Dependencias del proyecto
-└── uv.lock                       # Lock de dependencias
+├── .python-version                     # "3.11"
+├── Dockerfile                          # Multi-stage con uv
+├── README.md
+├── entrypoint.sh                       # exec uvicorn src.api.main:app --host 0.0.0.0 --port $PORT
+├── pyproject.toml
+└── uv.lock
 ```
 
 ---
