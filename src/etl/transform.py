@@ -66,7 +66,7 @@ def normalize_record(record, dataset_name):
         "categoria": cat,
         "subcategoria": subcat,
         "nombre": record.get("documentName") or record.get("name") or "",
-        "descripcion": (record.get("documentDescription") or "")[:300],
+        "descripcion": (record.get("documentDescription") or ""),
         "municipio": _parse_municipio(record),
         "territorio": _parse_territorio(record),
         "lat": lat,

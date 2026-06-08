@@ -1,0 +1,47 @@
+{
+  "dataset": "txoko_master_enriched.csv",
+  "fecha_enriquecimiento": "2026-06-05T12:32:10.102092",
+  "campos_opendata_euskadi": [
+    "id",
+    "source_dataset",
+    "source_url_json",
+    "categoria",
+    "subcategoria",
+    "nombre",
+    "descripcion",
+    "municipio",
+    "territorio",
+    "lat",
+    "lon",
+    "direccion",
+    "telefono",
+    "web",
+    "ficha_turismo"
+  ],
+  "campos_google_maps": [
+    "google_place_id",
+    "google_rating",
+    "google_num_reviews",
+    "google_match_conf"
+  ],
+  "fuente_google": {
+    "api": "Google Maps Places API — Text Search",
+    "url_docs": "https://developers.google.com/maps/documentation/places/web-service/text-search",
+    "licencia": "Google Maps Platform Terms of Service",
+    "uso_permitido": "rating y num_reviews — solo lectura, no redistribución de reseñas completas",
+    "coste": "gratuito hasta $200/mes de crédito Google Cloud"
+  },
+  "estrategia_matching": {
+    "metodo": "Text Search por nombre + municipio + 'Euskadi'",
+    "validacion": "distancia haversine entre coords CSV y coords Google Maps",
+    "umbral_high": "< 300m",
+    "umbral_medium": "< 800m",
+    "descartado": "> 800m"
+  },
+  "stats": {
+    "lugares_procesados": 200,
+    "con_rating": 0,
+    "match_high": 0,
+    "match_medium": 0
+  }
+}
