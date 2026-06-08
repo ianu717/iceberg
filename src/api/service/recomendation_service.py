@@ -52,9 +52,6 @@ CATEGORY_MAPPING = {
     'beaches': [
         'Espacios naturales'# ojo, hay playas y más cosas. hay que buscar en la categoría nombre
     ],
-    'festivals_events': [
-#aquí iría la llamada a kulturclick: en principio lo gestionaba full,
-    ],
 }
 
 def _a_recommendation(lugar: Lugar, distancia_m: float) -> Recommendation:
@@ -155,9 +152,6 @@ def recommend_by_local_score(
 
     recomendaciones = [_a_recommendation(lugar, dist) for lugar, dist in filas_por_distancia]
     return RecommendationResponse(recommendations=recomendaciones)
-
-def recommend_nearby_events(lat: float, lon: float) -> RecommendationResponse:
-    pass
 
 def recommend_by_category(
     db: Session,
