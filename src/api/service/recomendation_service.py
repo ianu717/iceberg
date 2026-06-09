@@ -57,6 +57,7 @@ def _a_recommendation(lugar: Lugar, distancia_m: float) -> Recommendation:
     """Mapea un Lugar de la BD al schema Recommendation."""
     score = round((lugar.local_ratio or 0) * 100)
     return Recommendation(
+        id=lugar.id,
         name=lugar.nombre,
         description=lugar.descripcion or "",
         local_score=score,

@@ -9,6 +9,7 @@ class RecommendationQuery(BaseModel):
     latitude: Annotated[float, Query(ge=-90, le=90)]
 
 class Recommendation(BaseModel):
+    id: str
     name: str
     description: str
     local_score: int = Field(ge=0,  le=100)
