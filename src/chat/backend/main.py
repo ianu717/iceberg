@@ -1,6 +1,7 @@
 """
 Txoko — Backend FastAPI
 """
+import traceback
 
 from contextlib import asynccontextmanager
 
@@ -8,13 +9,13 @@ import faiss
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
-from fastapi.middleware.cors import CORSMiddleware
-from .chat.config import EMBEDDING_MODEL
-from .chat.index_loader import load_faiss_index, load_metadata
-from .chat.llm import call_llm, init_llm
+
+from rag.config import EMBEDDING_MODEL, FAISS_TOP_K, RAG_DIR
+from rag.index_loader import load_faiss_index, load_metadata, load_indexes
+from rag.llm import call_llm, init_llm
 #from rag.llm import call_llm, init_gemini
-from .chat.prompt import build_prompt
-from .chat.retrieval import retrieve
+from rag.prompt import build_prompt
+from rag.retrieval import retrieve
 
 
 # ── Estado global en memoria ───────────────────────────────────────────────
@@ -34,9 +35,19 @@ async def lifespan(app: FastAPI):
     print("⏳ Cargando modelo de embeddings...")
     state.model = SentenceTransformer(EMBEDDING_MODEL)
 
-    print("⏳ Cargando índice FAISS y metadatos...")
-    state.index    = load_faiss_index()
-    state.metadata = load_metadata()
+    #  # ✅ Cargar TODOS los índices (global + territoriales)
+    # app.state.indexes = load_indexes(RAG_DIR)
+    # import traceback
+
+    try:
+        state.indexes = load_indexes(RAG_DIR)
+    except Exception as e:
+        print("ERROR AL CARGAR ÍNDICES:")
+        traceback.print_exc()
+
+    # print("⏳ Cargando índice FAISS y metadatos...")
+    # state.index    = load_faiss_index()
+    # state.metadata = load_metadata()
 
     # print("⏳ Inicializando Gemini...")
     # init_gemini()
@@ -56,12 +67,6 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # ── Schemas ────────────────────────────────────────────────────────────────
 
@@ -87,7 +92,12 @@ def chat(request: ChatRequest) -> ChatResponse:
         raise HTTPException(status_code=422, detail="La query no puede estar vacía.")
 
     # 1. Retrieve
-    places = retrieve(query, state.model, state.index, state.metadata)
+    places = retrieve(
+        query=query,
+        model=state.model,
+        indexes=state.indexes,  # ← cambia aquí
+        k = FAISS_TOP_K
+    )
 
     # DEBUG TEMPORAL — borrar cuando termines de diagnosticar
     print(f"DEBUG lugares encontrados: {len(places)}")

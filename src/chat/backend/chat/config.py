@@ -5,23 +5,24 @@ from dotenv import load_dotenv
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent.parent.parent  # /rag/
-CHAT_DIR  = BASE_DIR / "rag_assets"
+RAG_DIR  = BASE_DIR / "rag_assets_v2" #"rag_assets"
 
-FAISS_INDEX_PATH    = CHAT_DIR / "faiss_index.index"
-FAISS_METADATA_PATH = CHAT_DIR / "faiss_metadata.json"
+FAISS_INDEX_PATH    = RAG_DIR / "faiss_index.index"
+FAISS_METADATA_PATH = RAG_DIR / "faiss_metadata.json"
 
 # ── Embedding model ────────────────────────────────────────────────────────
-EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+# más ligero: EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+EMBEDDING_MODEL = "paraphrase-multilingual-mpnet-base-v2"
 
 # ── Retrieval ──────────────────────────────────────────────────────────────
-FAISS_TOP_K  = 50   # candidates retrieved from FAISS
+FAISS_TOP_K  = 100   # candidates retrieved from FAISS
 FINAL_TOP_K  = 10    # places actually sent to the LLM
 
 # ── LLM ───────────────────────────────────────────────────────────────────
 load_dotenv()
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-#GEMINI_MODEL = "models/gemini-2.0-flash"
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = "models/gemini-2.0-flash"
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 GROQ_MODEL   = "llama-3.1-8b-instant"
 
 # ── System prompt ──────────────────────────────────────────────────────────
@@ -38,7 +39,9 @@ SYSTEM_PROMPT = (
     "Si los lugares no encajan bien con la pregunta, dilo explícitamente.\n"
     "Si la pregunta es geográfica como 'cerca de X', advierte que no puedes "
     "garantizar proximidad exacta y sugiere verificar en el mapa.\n"
-    "Presenta máximo 3 recomendaciones, no todas las disponibles.\n"
+    "Presenta entre 1 y 3 recomendaciones según la información disponible. "
+    "Si solo tienes 1 o 2 opciones relevantes, preséntolas sin forzar más. "
+    "No recomiendes un lugar si no encaja claramente con la consulta.\n"
     "Sé breve y directo, máximo 3-4 frases por recomendación.\n"
     "Si el usuario pide algo auténtico, local o alejado del turismo masivo, "
     "prioriza los lugares con mayor puntuación de autenticidad local. "
