@@ -149,10 +149,8 @@ def recommend_by_local_score(
     filas = (
         db.query(Lugar, distancia)
         .filter(Lugar.ubicacion.isnot(None))
-        #.filter(Lugar.subcategoria.in_(subcategories))
-        #.filter(ST_DWithin(Lugar.ubicacion, punto, radio_m))
-        .order_by(Lugar.local_ratio.desc().nullslast())  # más local primero
-        .limit(top_n)                                     # top N por score
+        .order_by(Lugar.local_ratio.desc().nullslast())
+        .limit(top_n)
         .all()
     )
 

@@ -1,6 +1,3 @@
-"""
-Txoko — Backend FastAPI
-"""
 import traceback
 
 from contextlib import asynccontextmanager
@@ -9,13 +6,13 @@ import faiss
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer
+from fastapi.middleware.cors import CORSMiddleware
 
-from rag.config import EMBEDDING_MODEL, FAISS_TOP_K, RAG_DIR
-from rag.index_loader import load_faiss_index, load_metadata, load_indexes
-from rag.llm import call_llm, init_llm
-#from rag.llm import call_llm, init_gemini
-from rag.prompt import build_prompt
-from rag.retrieval import retrieve
+from .chat.config import EMBEDDING_MODEL, FAISS_TOP_K, RAG_DIR
+from .chat.index_loader import load_indexes
+from .chat.llm import call_llm, init_llm
+from .chat.prompt import build_prompt
+from .chat.retrieval import retrieve
 
 
 # ── Estado global en memoria ───────────────────────────────────────────────
@@ -67,7 +64,18 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+origins = [
+    "http://localhost:5500",        # tu frontend en local
+    "https://tu-frontend.onrender.com",  # tu frontend en producción
+]
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # ── Schemas ────────────────────────────────────────────────────────────────
 
 class ChatRequest(BaseModel):
